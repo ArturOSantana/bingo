@@ -122,7 +122,7 @@ export default function ViewPage() {
               <span className="text-sm font-black text-black/50 leading-none -mb-1">
                 {lastLetter?.letter}
               </span>
-              <span className="text-6xl font-black text-black leading-none">
+              <span className="text-5xl font-black text-black leading-none">
                 {lastNum}
               </span>
             </div>
