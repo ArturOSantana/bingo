@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { supabase } from "@/lib/supabase";
-import type { BingoSession, GameStatus } from "@/lib/types";
+import type { BingoSession, CardColor, GameStatus, RoundType } from "@/lib/types";
 
 interface BingoStore {
   session: BingoSession | null;
@@ -12,6 +12,8 @@ interface BingoStore {
   callNumber: (num: number) => Promise<void>;
   setPrize: (prize: string) => Promise<void>;
   setStatus: (status: GameStatus) => Promise<void>;
+  setCardColor: (color: CardColor) => Promise<void>;
+  setRoundType: (roundType: RoundType) => Promise<void>;
   resetGame: () => Promise<void>;
   subscribeToUpdates: () => () => void;
 }
@@ -44,6 +46,8 @@ export const useBingoStore = create<BingoStore>((set, get) => ({
       prize: "",
       game_status: "playing",
       last_drawn: null,
+      card_color: "yellow",
+      round_type: "principal",
     };
 
     const { data: created, error: insertError } = await supabase
@@ -101,6 +105,26 @@ export const useBingoStore = create<BingoStore>((set, get) => ({
     if (!alreadyCalled) {
       setTimeout(() => set({ lastCalledAnimation: false }), 2000);
     }
+  },
+
+  setCardColor: async (color: CardColor) => {
+    const { session } = get();
+    if (!session) return;
+    await supabase
+      .from("bingo_session")
+      .update({ card_color: color, updated_at: new Date().toISOString() })
+      .eq("id", "main");
+    set({ session: { ...session, card_color: color } });
+  },
+
+  setRoundType: async (roundType: RoundType) => {
+    const { session } = get();
+    if (!session) return;
+    await supabase
+      .from("bingo_session")
+      .update({ round_type: roundType, updated_at: new Date().toISOString() })
+      .eq("id", "main");
+    set({ session: { ...session, round_type: roundType } });
   },
 
   setPrize: async (prize: string) => {

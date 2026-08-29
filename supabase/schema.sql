@@ -11,6 +11,8 @@ create table if not exists bingo_session (
   prize text default '',
   game_status text default 'waiting' check (game_status in ('waiting', 'playing', 'paused', 'finished')),
   last_drawn integer,
+  card_color text default 'yellow' check (card_color in ('yellow', 'blue', 'green', 'red', 'pink', 'purple', 'orange', 'white')),
+  round_type text default 'principal' check (round_type in ('principal', 'extra')),
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -40,16 +42,22 @@ create policy "atualizacao_publica" on bingo_session
   for update to anon using (true) with check (true);
 
 -- 6. Insere a sessão inicial
-insert into bingo_session (id, drawn_numbers, remaining_numbers, prize, game_status, last_drawn)
+insert into bingo_session (id, drawn_numbers, remaining_numbers, prize, game_status, last_drawn, card_color, round_type)
 values (
   'main',
   '{}',
   array(select generate_series(1, 75)),
   '',
   'waiting',
-  null
+  null,
+  'yellow',
+  'principal'
 )
 on conflict (id) do nothing;
+
+-- Adiciona colunas em tabelas já existentes (migração segura)
+alter table bingo_session add column if not exists card_color text default 'yellow' check (card_color in ('yellow', 'blue', 'green', 'red', 'pink', 'purple', 'orange', 'white'));
+alter table bingo_session add column if not exists round_type text default 'principal' check (round_type in ('principal', 'extra'));
 
 -- 7. Confirma
 select * from bingo_session;

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useBingoStore } from "@/store/bingo";
 import { BingoGrid } from "@/components/BingoGrid";
 import { PrizeEditor } from "@/components/PrizeEditor";
+import { RoundConfig } from "@/components/RoundConfig";
 import { useTheme } from "@/hooks/useTheme";
 
 function getBingoLetter(n: number) {
@@ -102,6 +103,9 @@ export default function ViewPage() {
       </header>
 
       <div className="flex-1 px-4 py-4 flex flex-col gap-3 max-w-md mx-auto w-full">
+
+        {/* Tipo de rodada e cor da cartela */}
+        <RoundConfig readOnly theme={theme} />
 
         {/* Prêmio */}
         <PrizeEditor readOnly theme={theme} />

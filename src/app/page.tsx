@@ -5,6 +5,7 @@ import { useBingoStore } from "@/store/bingo";
 import { BingoGrid } from "@/components/BingoGrid";
 import { PrizeEditor } from "@/components/PrizeEditor";
 import { QRShare } from "@/components/QRShare";
+import { RoundConfig } from "@/components/RoundConfig";
 import { useTheme } from "@/hooks/useTheme";
 import Link from "next/link";
 
@@ -169,6 +170,9 @@ export default function AdminPage() {
               Reiniciar
             </button>
           </div>
+
+          {/* Configuração de rodada */}
+          <RoundConfig theme={theme} />
 
           {/* Prêmio */}
           <PrizeEditor theme={theme} />

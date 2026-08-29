@@ -12,6 +12,12 @@ const COLUMNS = [
   { letter: "O", color: "text-rose-500",   bg: "bg-rose-400",   numbers: Array.from({ length: 15 }, (_, i) => i + 61) },
 ];
 
+// Divide 15 números em duas sub-colunas: 8 na esquerda, 7 na direita
+function splitColumn(numbers: number[]): [number[], number[]] {
+  const mid = Math.ceil(numbers.length / 2);
+  return [numbers.slice(0, mid), numbers.slice(mid)];
+}
+
 interface BingoGridProps {
   calledNumbers: number[];
   lastCalled: number | null;
@@ -25,48 +31,57 @@ export function BingoGrid({ calledNumbers, lastCalled, onToggle, compact = false
 
   return (
     <div className="grid grid-cols-5 gap-2">
-      {COLUMNS.map((col) => (
-        <div key={col.letter} className="flex flex-col gap-1.5">
-          {/* Header da coluna */}
-          <div className={clsx(
-            "flex items-center justify-center font-black rounded-xl select-none",
-            col.color,
-            compact ? "h-8 text-base" : "h-10 text-xl",
-            isDark ? "bg-white/5 border border-white/10" : "bg-gray-100 border border-gray-200"
-          )}>
-            {col.letter}
+      {COLUMNS.map((col) => {
+        const [left, right] = splitColumn(col.numbers);
+        return (
+          <div key={col.letter} className="flex flex-col gap-1">
+            {/* Header da coluna — ocupa as duas sub-colunas */}
+            <div className={clsx(
+              "flex items-center justify-center font-black rounded-xl select-none",
+              col.color,
+              compact ? "h-8 text-base" : "h-10 text-xl",
+              isDark ? "bg-white/5 border border-white/10" : "bg-gray-100 border border-gray-200"
+            )}>
+              {col.letter}
+            </div>
+
+            {/* Duas sub-colunas lado a lado */}
+            <div className="grid grid-cols-2 gap-1">
+              {[left, right].map((half, hi) => (
+                <div key={hi} className="flex flex-col gap-1">
+                  {half.map((n) => {
+                    const isCalled = calledNumbers.includes(n);
+                    const isLast = n === lastCalled;
+
+                    return (
+                      <button
+                        key={n}
+                        onClick={() => onToggle?.(n)}
+                        disabled={!onToggle}
+                        className={clsx(
+                          "flex items-center justify-center font-bold rounded-lg transition-all duration-200 select-none aspect-square",
+                          compact ? "text-sm" : "text-base",
+                          isLast
+                            ? `${col.bg} text-black scale-105 shadow-lg ring-2 ring-white/30`
+                            : isCalled
+                            ? `${col.bg} text-black opacity-90`
+                            : isDark
+                            ? "bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/70"
+                            : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-700",
+                          onToggle && "cursor-pointer active:scale-95",
+                          !onToggle && "cursor-default"
+                        )}
+                      >
+                        {n}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           </div>
-
-          {/* Números da coluna */}
-          {col.numbers.map((n) => {
-            const isCalled = calledNumbers.includes(n);
-            const isLast = n === lastCalled;
-
-            return (
-              <button
-                key={n}
-                onClick={() => onToggle?.(n)}
-                disabled={!onToggle}
-                className={clsx(
-                  "flex items-center justify-center font-bold rounded-xl transition-all duration-200 select-none",
-                  compact ? "h-8 text-sm" : "h-11 text-base",
-                  isLast
-                    ? `${col.bg} text-black scale-105 shadow-lg ring-2 ring-white/30`
-                    : isCalled
-                    ? `${col.bg} text-black opacity-90`
-                    : isDark
-                    ? "bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/70"
-                    : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-700",
-                  onToggle && "cursor-pointer active:scale-95",
-                  !onToggle && "cursor-default"
-                )}
-              >
-                {n}
-              </button>
-            );
-          })}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
