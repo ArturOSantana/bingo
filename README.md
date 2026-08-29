@@ -66,3 +66,4 @@ Acesse `http://localhost:3000` para o admin e `http://localhost:3000/view` para 
 - ✅ Reiniciar o jogo com confirmação
 - ✅ Tela de fim de jogo
 # bingo
+# bingo
