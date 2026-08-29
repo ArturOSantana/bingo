@@ -67,3 +67,4 @@ Acesse `http://localhost:3000` para o admin e `http://localhost:3000/view` para 
 - ✅ Tela de fim de jogo
 # bingo
 # bingo
+# bingo
