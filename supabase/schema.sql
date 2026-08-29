@@ -41,7 +41,11 @@ create policy "insercao_publica" on bingo_session
 create policy "atualizacao_publica" on bingo_session
   for update to anon using (true) with check (true);
 
--- 6. Insere a sessão inicial
+-- 6. Garante que as colunas existem (migração segura para tabelas já criadas sem elas)
+alter table bingo_session add column if not exists card_color text default 'yellow' check (card_color in ('yellow', 'blue', 'green', 'red', 'pink', 'purple', 'orange', 'white'));
+alter table bingo_session add column if not exists round_type text default 'principal' check (round_type in ('principal', 'extra'));
+
+-- 7. Insere a sessão inicial
 insert into bingo_session (id, drawn_numbers, remaining_numbers, prize, game_status, last_drawn, card_color, round_type)
 values (
   'main',
@@ -55,9 +59,5 @@ values (
 )
 on conflict (id) do nothing;
 
--- Adiciona colunas em tabelas já existentes (migração segura)
-alter table bingo_session add column if not exists card_color text default 'yellow' check (card_color in ('yellow', 'blue', 'green', 'red', 'pink', 'purple', 'orange', 'white'));
-alter table bingo_session add column if not exists round_type text default 'principal' check (round_type in ('principal', 'extra'));
-
--- 7. Confirma
+-- 8. Confirma
 select * from bingo_session;

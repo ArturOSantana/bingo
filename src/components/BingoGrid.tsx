@@ -30,14 +30,14 @@ export function BingoGrid({ calledNumbers, lastCalled, onToggle, compact = false
   const isDark = theme === "dark";
 
   return (
-    <div className="grid grid-cols-5 gap-2">
+    <div className="grid grid-cols-5 gap-2 w-full h-full">
       {COLUMNS.map((col) => {
         const [left, right] = splitColumn(col.numbers);
         return (
-          <div key={col.letter} className="flex flex-col gap-1">
+          <div key={col.letter} className="flex flex-col gap-1 min-h-0">
             {/* Header da coluna — ocupa as duas sub-colunas */}
             <div className={clsx(
-              "flex items-center justify-center font-black rounded-xl select-none",
+              "flex items-center justify-center font-black rounded-xl select-none shrink-0",
               col.color,
               compact ? "h-8 text-base" : "h-10 text-xl",
               isDark ? "bg-white/5 border border-white/10" : "bg-gray-100 border border-gray-200"
@@ -46,9 +46,9 @@ export function BingoGrid({ calledNumbers, lastCalled, onToggle, compact = false
             </div>
 
             {/* Duas sub-colunas lado a lado */}
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-1 flex-1 min-h-0">
               {[left, right].map((half, hi) => (
-                <div key={hi} className="flex flex-col gap-1">
+                <div key={hi} className="grid gap-1" style={{ gridTemplateRows: `repeat(${half.length}, minmax(0, 1fr))` }}>
                   {half.map((n) => {
                     const isCalled = calledNumbers.includes(n);
                     const isLast = n === lastCalled;
@@ -59,7 +59,7 @@ export function BingoGrid({ calledNumbers, lastCalled, onToggle, compact = false
                         onClick={() => onToggle?.(n)}
                         disabled={!onToggle}
                         className={clsx(
-                          "flex items-center justify-center font-bold rounded-lg transition-all duration-200 select-none aspect-square",
+                          "flex items-center justify-center font-bold rounded-lg transition-all duration-200 select-none w-full h-full",
                           compact ? "text-sm" : "text-base",
                           isLast
                             ? `${col.bg} text-black scale-105 shadow-lg ring-2 ring-white/30`

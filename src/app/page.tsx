@@ -66,9 +66,9 @@ export default function AdminPage() {
   const divider = isDark ? "bg-white/10" : "bg-gray-200";
 
   return (
-    <div className={`min-h-screen ${bg} ${text} flex flex-col`}>
+    <div className={`h-screen ${bg} ${text} flex flex-col overflow-hidden`}>
       {/* Header */}
-      <header className={`border-b ${isDark ? "border-white/[0.07]" : "border-gray-200"} sticky top-0 z-10 ${isDark ? "bg-[#0f0f13]" : "bg-gray-50"}`}>
+      <header className={`border-b ${isDark ? "border-white/[0.07]" : "border-gray-200"} shrink-0 z-10 ${isDark ? "bg-[#0f0f13]" : "bg-gray-50"}`}>
         <div className="max-w-screen-2xl mx-auto px-6 h-12 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="font-semibold text-sm tracking-tight">Bingo</h1>
@@ -102,10 +102,10 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <div className="flex-1 max-w-screen-2xl mx-auto w-full px-6 py-6 flex gap-6">
+      <div className="flex-1 min-h-0 max-w-screen-2xl mx-auto w-full px-6 py-6 flex gap-6">
 
         {/* Coluna esquerda */}
-        <div className="w-56 shrink-0 flex flex-col gap-3">
+        <div className="w-56 shrink-0 flex flex-col gap-3 overflow-y-auto min-h-0">
 
           {/* Último número */}
           <div className={`border ${card} rounded-lg p-4 flex flex-col items-center gap-3`}>
@@ -228,18 +228,20 @@ export default function AdminPage() {
         </div>
 
         {/* Grade BINGO */}
-        <div className="flex-1 flex flex-col gap-3">
-          <div className={`border ${card} rounded-lg p-5 flex-1`}>
-            <div className="flex items-baseline justify-between mb-4">
+        <div className="flex-1 min-h-0 flex flex-col gap-3">
+          <div className={`border ${card} rounded-lg p-5 flex-1 min-h-0 flex flex-col`}>
+            <div className="flex items-baseline justify-between mb-4 shrink-0">
               <p className={`text-sm font-medium`}>Marque o número chamado</p>
               <span className={`text-xs ${muted}`}>clique para desmarcar</span>
             </div>
-            <BingoGrid
-              calledNumbers={session.drawn_numbers}
-              lastCalled={session.last_drawn}
-              onToggle={callNumber}
-              theme={theme}
-            />
+            <div className="flex-1 min-h-0 flex items-center h-full">
+              <BingoGrid
+                calledNumbers={session.drawn_numbers}
+                lastCalled={session.last_drawn}
+                onToggle={callNumber}
+                theme={theme}
+              />
+            </div>
           </div>
         </div>
       </div>
