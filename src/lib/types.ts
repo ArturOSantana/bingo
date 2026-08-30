@@ -6,7 +6,6 @@ export interface ChatMessage {
   session_id: string;
   author: string;
   body: string;
-  approved: boolean;
   created_at: string;
 }
 
