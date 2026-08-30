@@ -9,7 +9,7 @@ create table if not exists bingo_session (
   drawn_numbers integer[] default '{}',
   remaining_numbers integer[] default '{}',
   prize text default '',
-  game_status text default 'waiting' check (game_status in ('waiting', 'playing', 'paused', 'finished')),
+  game_status text default 'waiting' check (game_status in ('waiting', 'playing', 'paused', 'finished', 'farewell')),
   last_drawn integer,
   card_color text default 'yellow' check (card_color in ('yellow', 'blue', 'green', 'red', 'pink', 'purple', 'orange', 'white')),
   round_type text default 'principal' check (round_type in ('principal', 'extra')),

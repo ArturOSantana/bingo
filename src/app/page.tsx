@@ -55,6 +55,7 @@ export default function AdminPage() {
   const isFinished = session.game_status === "finished";
   const isPaused = session.game_status === "paused";
   const isPlaying = session.game_status === "playing";
+  const isFarewell = session.game_status === "farewell";
 
   const history = [...session.drawn_numbers].reverse();
   const lastNum = session.last_drawn;
@@ -74,7 +75,7 @@ export default function AdminPage() {
           <div className="flex items-center gap-4">
             <h1 className="font-semibold text-sm tracking-tight">Bingo</h1>
             <span className={`text-xs ${muted}`}>
-              {isPlaying ? "em andamento" : isPaused ? "pausado" : "finalizado"}
+              {isPlaying ? "em andamento" : isPaused ? "pausado" : isFarewell ? "encerrado" : "finalizado"}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -157,7 +158,7 @@ export default function AdminPage() {
           <div className="flex gap-2">
             <button
               onClick={() => setStatus(isPaused ? "playing" : "paused")}
-              disabled={isFinished}
+              disabled={isFinished || isFarewell}
               className={`flex-1 py-2 rounded text-xs font-medium border transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                 isDark
                   ? "border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/70"
@@ -173,6 +174,20 @@ export default function AdminPage() {
               Reiniciar
             </button>
           </div>
+
+          {/* Tela de despedida */}
+          <button
+            onClick={() => setStatus(isFarewell ? "finished" : "farewell")}
+            className={`w-full py-2 rounded text-xs font-medium border transition-colors ${
+              isFarewell
+                ? isDark
+                  ? "border-white/[0.08] bg-white/[0.04] text-white/50 hover:bg-white/[0.08]"
+                  : "border-gray-200 bg-white text-gray-400 hover:bg-gray-50"
+                : "border-violet-500/30 text-violet-400 hover:bg-violet-500/10"
+            }`}
+          >
+            {isFarewell ? "Ocultar despedida" : "✨ Tela de despedida"}
+          </button>
 
           {/* Configuração de rodada */}
           <RoundConfig theme={theme} />

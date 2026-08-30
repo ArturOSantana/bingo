@@ -14,7 +14,7 @@ export interface BingoSession {
   drawn_numbers: number[];
   remaining_numbers: number[];
   prize: string;
-  game_status: "waiting" | "playing" | "paused" | "finished";
+  game_status: "waiting" | "playing" | "paused" | "finished" | "farewell";
   last_drawn: number | null;
   card_color: CardColor;
   round_type: RoundType;

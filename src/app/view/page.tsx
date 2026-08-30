@@ -8,6 +8,57 @@ import { RoundConfig } from "@/components/RoundConfig";
 import { ChatView } from "@/components/ChatView";
 import { useTheme } from "@/hooks/useTheme";
 
+function FarewellScreen() {
+  return (
+    <div className="fixed inset-0 bg-[#0a0a10] flex flex-col items-center justify-center overflow-hidden">
+      {/* Partículas decorativas */}
+      <div className="absolute inset-0 pointer-events-none select-none" aria-hidden>
+        {["✦","✧","⋆","✦","✧","⋆","✦","✧","⋆","✦","✧","⋆"].map((s, i) => (
+          <span
+            key={i}
+            className="absolute text-violet-400/20 animate-pulse"
+            style={{
+              left: `${8 + i * 8}%`,
+              top: `${10 + (i % 3) * 30}%`,
+              fontSize: `${12 + (i % 4) * 6}px`,
+              animationDelay: `${i * 0.4}s`,
+              animationDuration: `${2 + (i % 3)}s`,
+            }}
+          >
+            {s}
+          </span>
+        ))}
+      </div>
+
+      {/* Conteúdo central */}
+      <div className="relative flex flex-col items-center gap-6 px-8 text-center animate-slide-up">
+        {/* Ícone */}
+        <div className="w-20 h-20 rounded-full bg-violet-500/15 border border-violet-500/25 flex items-center justify-center text-4xl">
+          🎉
+        </div>
+
+        {/* Título */}
+        <div className="flex flex-col gap-2">
+          <p className="text-violet-400/60 text-xs uppercase tracking-[0.3em] font-medium">
+            Obrigado por participar
+          </p>
+          <h1 className="text-white text-4xl font-black leading-tight tracking-tight">
+            Agradecemos<br />a presença
+          </h1>
+        </div>
+
+        {/* Linha decorativa */}
+        <div className="w-16 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
+
+        {/* Mensagem */}
+        <p className="text-white/30 text-sm leading-relaxed max-w-xs">
+          Foi um prazer ter você aqui.<br />Até a próxima! 👋
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function getBingoLetter(n: number) {
   if (n <= 15) return { letter: "B", gradient: "from-sky-400 to-sky-600" };
   if (n <= 30) return { letter: "I", gradient: "from-violet-400 to-violet-600" };
@@ -42,6 +93,7 @@ export default function ViewPage() {
 
   const isPaused = session.game_status === "paused";
   const isFinished = session.game_status === "finished";
+  const isFarewell = session.game_status === "farewell";
   const lastNum = session.last_drawn;
   const lastLetter = lastNum ? getBingoLetter(lastNum) : null;
   const recentHistory = [...session.drawn_numbers].reverse().slice(0, 10);
@@ -50,6 +102,10 @@ export default function ViewPage() {
   const text = isDark ? "text-white" : "text-gray-900";
   const card = isDark ? "bg-white/[0.03] border-white/[0.07]" : "bg-white border-gray-200";
   const muted = isDark ? "text-white/35" : "text-gray-400";
+
+  if (isFarewell) {
+    return <FarewellScreen />;
+  }
 
   return (
     <div className={`min-h-screen ${bg} ${text} flex flex-col`}>
