@@ -6,6 +6,7 @@ import { BingoGrid } from "@/components/BingoGrid";
 import { PrizeEditor } from "@/components/PrizeEditor";
 import { QRShare } from "@/components/QRShare";
 import { RoundConfig } from "@/components/RoundConfig";
+import { ChatModerator } from "@/components/ChatModerator";
 import { useTheme } from "@/hooks/useTheme";
 import Link from "next/link";
 
@@ -179,6 +180,9 @@ export default function AdminPage() {
 
           {/* QR Code */}
           <QRShare theme={theme} />
+
+          {/* Chat moderado */}
+          <ChatModerator theme={theme} />
 
           {/* Progresso */}
           <div className={`border ${card} rounded-lg px-3 py-2.5`}>

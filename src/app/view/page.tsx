@@ -5,6 +5,7 @@ import { useBingoStore } from "@/store/bingo";
 import { BingoGrid } from "@/components/BingoGrid";
 import { PrizeEditor } from "@/components/PrizeEditor";
 import { RoundConfig } from "@/components/RoundConfig";
+import { ChatView } from "@/components/ChatView";
 import { useTheme } from "@/hooks/useTheme";
 
 function getBingoLetter(n: number) {
@@ -214,6 +215,9 @@ export default function ViewPage() {
             </div>
           </div>
         )}
+
+        {/* Chat */}
+        <ChatView theme={theme} />
       </div>
     </div>
   );

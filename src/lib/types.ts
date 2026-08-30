@@ -1,6 +1,15 @@
 export type CardColor = "yellow" | "blue" | "green" | "red" | "pink" | "purple" | "orange" | "white";
 export type RoundType = "principal" | "extra";
 
+export interface ChatMessage {
+  id: string;
+  session_id: string;
+  author: string;
+  body: string;
+  approved: boolean;
+  created_at: string;
+}
+
 export interface BingoSession {
   id: string;
   drawn_numbers: number[];
