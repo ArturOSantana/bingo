@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/store/chat";
 import type { Theme } from "@/hooks/useTheme";
 
-interface ChatInputProps {
+interface ChatViewProps {
   theme?: Theme;
 }
 
-export function ChatView({ theme = "dark" }: ChatInputProps) {
-  const { approved, isLoading, fetchMessages, sendMessage, subscribe } = useChatStore();
+export function ChatView({ theme = "dark" }: ChatViewProps) {
+  const { messages, isLoading, fetchMessages, sendMessage, subscribe } = useChatStore();
 
   const isDark = theme === "dark";
   const card = isDark ? "bg-white/[0.03] border-white/[0.07]" : "bg-white border-gray-200";
@@ -32,7 +32,7 @@ export function ChatView({ theme = "dark" }: ChatInputProps) {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [approved.length]);
+  }, [messages.length]);
 
   const handleSend = async () => {
     const trimmed = body.trim();
@@ -42,7 +42,7 @@ export function ChatView({ theme = "dark" }: ChatInputProps) {
     setBody("");
     setSent(true);
     setSending(false);
-    setTimeout(() => setSent(false), 3000);
+    setTimeout(() => setSent(false), 2000);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -53,19 +53,19 @@ export function ChatView({ theme = "dark" }: ChatInputProps) {
   };
 
   return (
-    <div className={`border ${card} rounded-2xl flex flex-col gap-0 overflow-hidden`}>
+    <div className={`border ${card} rounded-2xl flex flex-col overflow-hidden`}>
       <div className={`px-4 py-3 border-b ${isDark ? "border-white/[0.06]" : "border-gray-100"}`}>
         <p className={`text-xs uppercase tracking-widest ${muted}`}>Chat</p>
       </div>
 
-      {/* Mensagens aprovadas */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2 max-h-60 min-h-[80px]">
+      {/* Mensagens */}
+      <div className="overflow-y-auto px-4 py-3 flex flex-col gap-2.5 max-h-64 min-h-[80px]">
         {isLoading ? (
           <p className={`text-xs ${muted} text-center pt-4`}>Carregando...</p>
-        ) : approved.length === 0 ? (
+        ) : messages.length === 0 ? (
           <p className={`text-xs ${muted} text-center pt-4`}>Nenhuma mensagem ainda</p>
         ) : (
-          approved.map((msg) => (
+          messages.map((msg) => (
             <div key={msg.id} className="flex flex-col gap-0.5">
               <span className={`text-[10px] font-semibold ${isDark ? "text-white/50" : "text-gray-500"}`}>
                 {msg.author}
@@ -106,9 +106,7 @@ export function ChatView({ theme = "dark" }: ChatInputProps) {
           </button>
         </div>
         {sent && (
-          <p className="text-[11px] text-emerald-500">
-            ✓ Mensagem enviada — aguarda aprovação do admin
-          </p>
+          <p className="text-[11px] text-emerald-500">✓ Enviado</p>
         )}
         <p className={`text-[10px] ${muted}`}>
           {body.length}/200 · Enter para enviar

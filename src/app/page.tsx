@@ -103,7 +103,9 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <div className="flex-1 min-h-0 max-w-screen-2xl mx-auto w-full px-6 py-6 flex gap-6">
+      <div className="flex-1 min-h-0 flex overflow-hidden">
+        {/* Conteúdo central */}
+        <div className="flex-1 min-h-0 max-w-screen-2xl mx-auto w-full px-6 py-6 flex gap-6 overflow-hidden">
 
         {/* Coluna esquerda */}
         <div className="w-56 shrink-0 flex flex-col gap-3 overflow-y-auto min-h-0">
@@ -181,9 +183,6 @@ export default function AdminPage() {
           {/* QR Code */}
           <QRShare theme={theme} />
 
-          {/* Chat moderado */}
-          <ChatModerator theme={theme} />
-
           {/* Progresso */}
           <div className={`border ${card} rounded-lg px-3 py-2.5`}>
             <div className="flex justify-between mb-1.5">
@@ -248,6 +247,11 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+
+        </div>{/* fim conteúdo central */}
+
+        {/* Chat — coluna direita redimensionável */}
+        <ChatModerator theme={theme} />
       </div>
 
       {/* Modal reset */}
