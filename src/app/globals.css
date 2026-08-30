@@ -45,11 +45,17 @@ body {
   to { transform: rotate(360deg); }
 }
 
+@keyframes slide-in-right {
+  0% { transform: translateX(calc(100% + 20px)); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
 .animate-pop-in { animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 .animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
 .animate-pulse-ring { animation: pulse-ring 1.5s ease-out infinite; }
 .animate-slide-up { animation: slide-up 0.3s ease-out forwards; }
 .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+.animate-slide-in-right { animation: slide-in-right 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
 .ball-drawn {
   background: linear-gradient(135deg, #fbbf24, #f59e0b);

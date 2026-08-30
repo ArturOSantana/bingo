@@ -1,21 +1,118 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/store/chat";
 import type { Theme } from "@/hooks/useTheme";
+import type { ChatMessage } from "@/lib/types";
 
 interface ChatModeratorProps {
   theme?: Theme;
 }
 
+/** Um toast individual com auto-dismiss de 3s, pausado no hover */
+function PendingToast({
+  msg,
+  isDark,
+  onApprove,
+  onDelete,
+}: {
+  msg: ChatMessage;
+  isDark: boolean;
+  onApprove: () => void;
+  onDelete: () => void;
+}) {
+  const [visible, setVisible] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const [progress, setProgress] = useState(100);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const DURATION = 3000;
+  const TICK = 50;
+
+  useEffect(() => {
+    let elapsed = 0;
+    intervalRef.current = setInterval(() => {
+      if (paused) return;
+      elapsed += TICK;
+      setProgress(Math.max(0, 100 - (elapsed / DURATION) * 100));
+      if (elapsed >= DURATION) {
+        clearInterval(intervalRef.current!);
+        setVisible(false);
+      }
+    }, TICK);
+    return () => clearInterval(intervalRef.current!);
+  }, [paused]);
+
+  if (!visible) return null;
+
+  return (
+    <div
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      className={`
+        w-72 rounded-xl border shadow-xl overflow-hidden
+        animate-slide-in-right
+        ${isDark
+          ? "bg-[#1c1c24] border-white/10 text-white"
+          : "bg-white border-gray-200 text-gray-900"}
+      `}
+    >
+      {/* Barra de progresso */}
+      <div className="h-0.5 bg-amber-500/20 w-full">
+        <div
+          className="h-full bg-amber-500 transition-none"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      <div className="px-4 py-3 flex flex-col gap-2">
+        {/* Remetente + mensagem */}
+        <div className="flex flex-col gap-0.5">
+          <span className={`text-[10px] font-semibold uppercase tracking-wide ${isDark ? "text-amber-400/70" : "text-amber-600"}`}>
+            {msg.author}
+          </span>
+          <p className={`text-sm leading-snug ${isDark ? "text-white/85" : "text-gray-800"}`}>
+            {msg.body}
+          </p>
+        </div>
+
+        {/* Ações */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => { onApprove(); setVisible(false); }}
+            className="flex-1 py-1 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition-colors"
+          >
+            ✓ Aprovar
+          </button>
+          <button
+            onClick={() => { onDelete(); setVisible(false); }}
+            className="flex-1 py-1 rounded-lg text-xs font-semibold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+          >
+            ✕ Remover
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ChatModerator({ theme = "dark" }: ChatModeratorProps) {
-  const { approved, pending, isLoading, fetchMessages, fetchPending, approveMessage, deleteMessage, subscribe } =
-    useChatStore();
+  const {
+    pending,
+    isLoading,
+    fetchMessages,
+    fetchPending,
+    approveMessage,
+    deleteMessage,
+    subscribe,
+  } = useChatStore();
 
   const isDark = theme === "dark";
   const card = isDark ? "bg-white/[0.03] border-white/[0.07]" : "bg-white border-gray-200";
   const muted = isDark ? "text-white/35" : "text-gray-400";
-  const approvedBottomRef = useRef<HTMLDivElement>(null);
+
+  // IDs de mensagens já exibidas como toast (para não re-mostrar no polling)
+  const shownRef = useRef<Set<string>>(new Set());
+  const [toasts, setToasts] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     fetchMessages();
@@ -24,106 +121,54 @@ export function ChatModerator({ theme = "dark" }: ChatModeratorProps) {
     return unsub;
   }, []);
 
-  // Polling de pendentes a cada 4s (Realtime INSERT já captura novos, mas garante consistência)
+  // Polling de pendentes a cada 4s
   useEffect(() => {
     const interval = setInterval(() => fetchPending(), 4000);
     return () => clearInterval(interval);
   }, []);
 
+  // Sempre que `pending` mudar, enfileira novos toasts
   useEffect(() => {
-    approvedBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [approved.length]);
+    const newOnes = pending.filter((m) => !shownRef.current.has(m.id));
+    if (newOnes.length === 0) return;
+    newOnes.forEach((m) => shownRef.current.add(m.id));
+    setToasts((prev) => [...prev, ...newOnes]);
+  }, [pending]);
 
-  const total = pending.length + approved.length;
+  const removeToast = (id: string) =>
+    setToasts((prev) => prev.filter((m) => m.id !== id));
 
   return (
-    <div className={`rounded-2xl border ${card} flex flex-col overflow-hidden`}>
-      {/* Header */}
-      <div className={`px-4 py-3 flex items-center justify-between border-b ${isDark ? "border-white/[0.06]" : "border-gray-100"}`}>
+    <>
+      {/* Card compacto na sidebar */}
+      <div className={`rounded-2xl border ${card} px-4 py-3 flex items-center justify-between`}>
         <p className={`text-xs uppercase tracking-widest ${muted}`}>Chat</p>
         <div className="flex items-center gap-2">
-          {pending.length > 0 && (
-            <span className="text-[10px] font-bold bg-amber-500 text-black rounded-full px-1.5 py-0.5 leading-none">
+          {isLoading ? (
+            <span className={`text-[10px] ${muted}`}>…</span>
+          ) : pending.length > 0 ? (
+            <span className="text-[10px] font-bold bg-amber-500 text-black rounded-full px-1.5 py-0.5 leading-none animate-pulse">
               {pending.length} pendente{pending.length > 1 ? "s" : ""}
             </span>
+          ) : (
+            <span className={`text-[10px] ${muted}`}>nenhum pendente</span>
           )}
-          <span className={`text-[10px] ${muted}`}>{total} mensage{total !== 1 ? "ns" : "m"}</span>
         </div>
       </div>
 
-      {/* Fila de pendentes */}
-      {pending.length > 0 && (
-        <div className={`px-4 py-3 border-b ${isDark ? "border-white/[0.06] bg-amber-500/[0.04]" : "border-amber-100 bg-amber-50"}`}>
-          <p className={`text-[10px] uppercase tracking-widest mb-2 ${isDark ? "text-amber-400/70" : "text-amber-600"}`}>
-            Aguardando moderação
-          </p>
-          <div className="flex flex-col gap-2 max-h-44 overflow-y-auto">
-            {pending.map((msg) => (
-              <div
-                key={msg.id}
-                className={`rounded-lg p-2.5 flex flex-col gap-1 ${isDark ? "bg-white/5 border border-white/8" : "bg-white border border-amber-100"}`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex flex-col min-w-0">
-                    <span className={`text-[10px] font-semibold ${isDark ? "text-white/50" : "text-gray-500"}`}>
-                      {msg.author}
-                    </span>
-                    <span className={`text-xs leading-snug ${isDark ? "text-white/80" : "text-gray-800"}`}>
-                      {msg.body}
-                    </span>
-                  </div>
-                  <div className="flex gap-1 shrink-0 mt-0.5">
-                    <button
-                      onClick={() => approveMessage(msg.id)}
-                      title="Aprovar"
-                      className="w-6 h-6 rounded-md flex items-center justify-center text-emerald-500 hover:bg-emerald-500/15 transition-colors text-sm"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={() => deleteMessage(msg.id)}
-                      title="Remover"
-                      className="w-6 h-6 rounded-md flex items-center justify-center text-red-400 hover:bg-red-500/15 transition-colors text-xs"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+      {/* Toasts flutuantes */}
+      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-3 items-end pointer-events-none">
+        {toasts.map((msg) => (
+          <div key={msg.id} className="pointer-events-auto">
+            <PendingToast
+              msg={msg}
+              isDark={isDark}
+              onApprove={() => { approveMessage(msg.id); removeToast(msg.id); }}
+              onDelete={() => { deleteMessage(msg.id); removeToast(msg.id); }}
+            />
           </div>
-        </div>
-      )}
-
-      {/* Mensagens aprovadas */}
-      <div className="flex-1 px-4 py-3 flex flex-col gap-2 overflow-y-auto max-h-52 min-h-[60px]">
-        {isLoading ? (
-          <p className={`text-xs ${muted} text-center pt-2`}>Carregando...</p>
-        ) : approved.length === 0 ? (
-          <p className={`text-xs ${muted} text-center pt-2`}>Sem mensagens aprovadas</p>
-        ) : (
-          approved.map((msg) => (
-            <div key={msg.id} className="flex items-start gap-2 group">
-              <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                <span className={`text-[10px] font-semibold ${isDark ? "text-white/50" : "text-gray-500"}`}>
-                  {msg.author}
-                </span>
-                <span className={`text-xs leading-snug ${isDark ? "text-white/75" : "text-gray-700"}`}>
-                  {msg.body}
-                </span>
-              </div>
-              <button
-                onClick={() => deleteMessage(msg.id)}
-                title="Remover mensagem"
-                className={`shrink-0 w-5 h-5 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:bg-red-500/15 text-[10px]`}
-              >
-                ✕
-              </button>
-            </div>
-          ))
-        )}
-        <div ref={approvedBottomRef} />
+        ))}
       </div>
-    </div>
+    </>
   );
 }
